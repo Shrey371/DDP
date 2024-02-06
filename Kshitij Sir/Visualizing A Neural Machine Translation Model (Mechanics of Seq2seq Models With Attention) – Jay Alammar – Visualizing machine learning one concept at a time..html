@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<!-- saved from url=(0109)https://jalammar.github.io/visualizing-neural-machine-translation-mechanics-of-seq2seq-models-with-attention/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time.</title>
+
+        
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+    
+    <meta name="description" content="Translations: Chinese (Simplified), French, Japanese, Korean, Persian, Russian, Turkish, Uzbek
+
+Watch: MIT’s Deep Learning State of the Art lecture referencing this post
+
+May 25th update: New graphics (RNN animation, word embedding graph), color coding, elaborated on the final attention example.
+
+Note: The animations below are videos. Touch or hover on them (if you’re using a mouse) to get play controls so you can pause if needed.
+
+Sequence-to-sequence models are deep learning models that have achieved a lot of success in tasks like machine translation, text summarization, and image captioning. Google Translate started using such a model in production in late 2016. These models are explained in the two pioneering papers (Sutskever et al., 2014, Cho et al., 2014).
+
+I found, however, that understanding the model well enough to implement it requires unraveling a series of concepts that build on top of each other. I thought that a bunch of these ideas would be more accessible if expressed visually. That’s what I aim to do in this post. You’ll need some previous understanding of deep learning to get through this post. I hope it can be a useful companion to reading the papers mentioned above (and the attention papers linked later in the post).
+
+A sequence-to-sequence model is a model that takes a sequence of items (words, letters, features of an images…etc) and outputs another sequence of items. A trained model would work like this:
+
+  
+  Your browser does not support the video tag.
+
+
+">
+    <meta property="og:description" content="Translations: Chinese (Simplified), French, Japanese, Korean, Persian, Russian, Turkish, Uzbek
+
+Watch: MIT’s Deep Learning State of the Art lecture referencing this post
+
+May 25th update: New graphics (RNN animation, word embedding graph), color coding, elaborated on the final attention example.
+
+Note: The animations below are videos. Touch or hover on them (if you’re using a mouse) to get play controls so you can pause if needed.
+
+Sequence-to-sequence models are deep learning models that have achieved a lot of success in tasks like machine translation, text summarization, and image captioning. Google Translate started using such a model in production in late 2016. These models are explained in the two pioneering papers (Sutskever et al., 2014, Cho et al., 2014).
+
+I found, however, that understanding the model well enough to implement it requires unraveling a series of concepts that build on top of each other. I thought that a bunch of these ideas would be more accessible if expressed visually. That’s what I aim to do in this post. You’ll need some previous understanding of deep learning to get through this post. I hope it can be a useful companion to reading the papers mentioned above (and the attention papers linked later in the post).
+
+A sequence-to-sequence model is a model that takes a sequence of items (words, letters, features of an images…etc) and outputs another sequence of items. A trained model would work like this:
+
+  
+  Your browser does not support the video tag.
+
+
+">
+    
+    <meta name="author" content="Jay Alammar">
+
+    
+    <meta property="og:title" content="Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention)">
+    <meta property="twitter:title" content="Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention)">
+    
+
+    <!--[if lt IE 9]>
+      <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <script src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/jquery-3.1.1.slim.min.js"></script>
+    <script type="text/javascript" src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/d3.min.js"></script>
+    <script type="text/javascript" src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/d3-selection-multi.v0.4.min.js"></script>
+    <script type="text/javascript" src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/d3-jetpack.js"></script>
+
+    <link rel="stylesheet" href="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/bootstrap.min.css">
+    <link rel="stylesheet" href="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/bootstrap-theme.min.css">
+    <script src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/bootstrap.min.js"> </script>
+
+    <link rel="stylesheet" type="text/css" href="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/gifplayer.css">
+    <script type="text/javascript" src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/jquery.gifplayer.js"></script>
+
+    <!--
+    <script data-main="scripts/main" src="scripts/require.js"></script>
+    -->
+    <link rel="stylesheet" href="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/katex.min.css" integrity="sha384-wE+lCONuEo/QSfLb4AfrSk7HjWJtc4Xc1OiB2/aDBzHzjnlBP4SX7vjErTcwlA8C" crossorigin="anonymous">
+    <script src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/katex.min.js" integrity="sha384-tdtuPw3yx/rnUGmnLNWXtfjb9fpmwexsd+lr6HUYnUY4B7JhB5Ty7a1mYd+kto/s" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" type="text/css" href="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/style.css">
+    <link rel="alternate" type="application/rss+xml" title="Jay Alammar - Visualizing machine learning one concept at a time." href="https://jalammar.github.io/feed.xml">
+
+    <meta name="viewport" content="width=device-width">
+    <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+
+    <!-- Piwik -->
+    <!-- Piwik
+    <script type="text/javascript">
+        var _paq = _paq || [];
+        _paq.push(["setDomains", ["*.example.org"]]);
+        _paq.push(['trackPageView']);
+        _paq.push(['enableLinkTracking']);
+        (function() {
+            var u="https://a.jalammar.com/";
+            _paq.push(['setTrackerUrl', u+'piwik.php']);
+            _paq.push(['setSiteId', '1']);
+            var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+            g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+        })();
+    </script>
+    <noscript><p><img src="https://a.jalammar.com/piwik.php?idsite=1" style="border:0;" alt="" /></p></noscript>-->
+    <!-- End Piwik Code -->
+
+    <!-- End Piwik Code -->
+  <style type="text/css">#mc_embed_signup input.mce_inline_error { border-color:#6B0505; } #mc_embed_signup div.mce_inline_error { margin: 0 0 1em 0; padding: 5px 10px; background-color:#6B0505; font-weight: bold; z-index: 1; color:#fff; }</style></head>
+
+  <body style="zoom: 1;" data-new-gr-c-s-check-loaded="14.1149.0" data-gr-ext-installed="">
+    <div class="wrapper-masthead">
+      <div class="container">
+        <header class="masthead clearfix">
+          <a href="https://jalammar.github.io/" class="site-avatar"><img src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/1007956"></a>
+
+          <div class="site-info">
+            <h1 class="site-name"><a href="https://jalammar.github.io/">Jay Alammar</a></h1>
+            <p class="site-description">Visualizing machine learning one concept at a time.<br><a href="https://twitter.com/JayAlammar">@JayAlammar</a> on Twitter. <a href="https://www.youtube.com/channel/UCmOwsoHty5PrmE-3QhUBfPQ">YouTube Channel</a></p>
+          </div>
+
+          <nav>
+            <a href="https://jalammar.github.io/">Blog</a>
+            <a href="https://jalammar.github.io/about">About</a>
+          </nav>
+        </header>
+      </div>
+    </div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <h1>Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention)</h1>
+
+  <div class="entry prediction">
+    <p><span class="discussion">Translations: <a href="https://blog.csdn.net/qq_41664845/article/details/84245520">Chinese (Simplified)</a>, <a href="https://lbourdois.github.io/blog/nlp/Seq2seq-et-attention/">French</a>, <a href="https://tips-memo.com/translation-jayalmmar-attention">Japanese</a>, <a href="https://nlpinkorean.github.io/visualizing-neural-machine-translation-mechanics-of-seq2seq-models-with-attention/">Korean</a>, <a href="http://dml.qom.ac.ir/2021/10/03/visualizing-a-neural-machine-translation-model/">Persian</a>, <a href="https://habr.com/ru/post/486158/">Russian</a>, <a href="https://medium.com/@SenemAktas/n%C3%B6ral-makine-%C3%A7eviri-modelini-g%C3%B6rselle%C5%9Ftirme-seq2seq-modelinin-attention-mekanizmas%C4%B1-b12581b5a1df">Turkish</a>, <a href="https://murodbek.substack.com/p/neyron-mashinaviy-tarjima-modellarini">Uzbek</a></span>
+<br>
+<span class="discussion">Watch: MIT’s <a href="https://youtu.be/53YvP6gdD7U?t=335">Deep Learning State of the Art</a> lecture referencing this post</span></p>
+
+<p><strong>May 25th update:</strong> New graphics (RNN animation, word embedding graph), color coding, elaborated on the final attention example.</p>
+
+<p><strong>Note:</strong> The animations below are videos. Touch or hover on them (if you’re using a mouse) to get play controls so you can pause if needed.</p>
+
+<p>Sequence-to-sequence models are deep learning models that have achieved a lot of success in tasks like machine translation, text summarization, and image captioning. Google Translate started <a href="https://blog.google/products/translate/found-translation-more-accurate-fluent-sentences-google-translate/">using</a> such a model in production in late 2016. These models are explained in the two pioneering papers (<a href="https://papers.nips.cc/paper/5346-sequence-to-sequence-learning-with-neural-networks.pdf">Sutskever et al., 2014</a>, <a href="http://emnlp2014.org/papers/pdf/EMNLP2014179.pdf">Cho et al., 2014</a>).</p>
+
+<p>I found, however, that understanding the model well enough to implement it requires unraveling a series of concepts that build on top of each other. I thought that a bunch of these ideas would be more accessible if expressed visually. That’s what I aim to do in this post. You’ll need some previous understanding of deep learning to get through this post. I hope it can be a useful companion to reading the papers mentioned above (and the attention papers linked later in the post).</p>
+
+<p>A sequence-to-sequence model is a model that takes a sequence of items (words, letters, features of an images…etc) and outputs another sequence of items. A trained model would work like this:</p>
+<video width="100%" height="auto" loop="" autoplay="" controls="">
+  <source src="/images/seq2seq_1.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<!--more-->
+
+<p><br></p>
+
+<p>In neural machine translation, a sequence is a series of words, processed one after another. The output is, likewise, a series of words:</p>
+
+<video width="100%" height="auto" loop="" autoplay="" controls="">
+  <source src="/images/seq2seq_2.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<h2 id="looking-under-the-hood">Looking under the hood</h2>
+
+<p>Under the hood, the model is composed of an <span class="encoder">encoder</span> and a <span class="decoder">decoder</span>.</p>
+
+<p>The <span class="encoder">encoder</span> processes each item in the input sequence, it compiles the information it captures into a vector (called the <span class="context">context</span>). After processing the entire input sequence, the <span class="encoder">encoder</span> sends the <span class="context">context</span>  over to the <span class="decoder">decoder</span>, which begins producing the output sequence item by item.</p>
+
+<video width="100%" height="auto" loop="" autoplay="" controls="">
+  <source src="/images/seq2seq_3.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><br></p>
+
+<p>The same applies in the case of machine translation.</p>
+
+<video width="100%" height="auto" loop="" autoplay="" controls="">
+  <source src="/images/seq2seq_4.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p>The <span class="context">context</span>  is a vector (an array of numbers, basically) in the case of machine translation. The <span class="encoder">encoder</span> and <span class="decoder">decoder</span>  tend to both be recurrent neural networks (Be sure to check out Luis Serrano’s <a href="https://www.youtube.com/watch?v=UNmqTiOnRfg">A friendly introduction to Recurrent Neural Networks</a> for an intro to RNNs).</p>
+
+<div class="img-div">
+    <img src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/context.png">
+    The <span class="context">context</span>  is a vector of floats. Later in this post we will visualize vectors in color by assigning brighter colors to the cells with higher values.
+</div>
+
+<p>You can set the size of the <span class="context">context</span>  vector when you set up your model. It is basically the number of hidden units in the <span class="encoder">encoder</span> RNN. These visualizations show a vector of size 4, but in real world applications the <span class="context">context</span> vector would be of a size like 256, 512, or 1024.</p>
+
+<p><br></p>
+
+<p>By design, a RNN takes two inputs at each time step: an input (in the case of the encoder, one word from the input sentence), and a hidden state. The word, however, needs to be represented by a vector. To transform a word into a vector, we turn to the class of methods called “<a href="https://machinelearningmastery.com/what-are-word-embeddings/">word embedding</a>” algorithms. These turn words into vector spaces that capture a lot of the meaning/semantic information of the words (e.g. <a href="http://p.migdal.pl/2017/01/06/king-man-woman-queen-why.html">king - man + woman = queen</a>).</p>
+
+<p><br></p>
+
+<div class="img-div">
+    <img src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/embedding.png">
+    We need to turn the input words into vectors before processing them. That transformation is done using a <a href="https://en.wikipedia.org/wiki/Word_embedding">word embedding</a> algorithm. We can use <a href="http://ahogrammer.com/2017/01/20/the-list-of-pretrained-word-embeddings/">pre-trained embeddings</a> or train our own embedding on our dataset. Embedding vectors of size 200 or 300 are typical, we're showing a vector of size four for simplicity.
+</div>
+
+<p>Now that we’ve introduced our main vectors/tensors, let’s recap the mechanics of an RNN and establish a visual language to describe these models:</p>
+
+<video width="100%" height="auto" loop="" autoplay="" controls="">
+  <source src="/images/RNN_1.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><br></p>
+
+<p>The next RNN step takes the second input vector and hidden state #1 to create the output of that time step. Later in the post, we’ll use an animation like this to describe the vectors inside a neural machine translation model.</p>
+
+<p><br></p>
+
+<p>In the following visualization, each pulse for the <span class="encoder">encoder</span> or <span class="decoder">decoder</span>  is that RNN processing its inputs and generating an output for that time step. Since the <span class="encoder">encoder</span> and <span class="decoder">decoder</span>  are both RNNs, each time step one of the RNNs does some processing, it updates its <span class="context">hidden state</span>  based on its inputs and previous inputs it has seen.</p>
+
+<p>Let’s look at the <span class="context">hidden states</span>  for the <span class="encoder">encoder</span>. Notice how the last <span class="context">hidden state</span>  is actually the <span class="context">context</span>  we pass along to the <span class="decoder">decoder</span>.</p>
+
+<video width="100%" height="auto" loop="" autoplay="" controls="">
+  <source src="/images/seq2seq_5.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><br></p>
+
+<p>The <span class="decoder">decoder</span>  also maintains a <span class="decoder">hidden state</span>  that it passes from one time step to the next. We just didn’t visualize it in this graphic because we’re concerned with the major parts of the model for now.</p>
+
+<p>Let’s now look at another way to visualize a sequence-to-sequence model. This animation will make it easier to understand the static graphics that describe these models. This is called an “unrolled” view where instead of showing the one <span class="decoder">decoder</span>, we show a copy of it for each time step. This way we can look at the inputs and outputs of each time step.</p>
+
+<video width="100%" height="auto" loop="" autoplay="" controls="">
+  <source src="/images/seq2seq_6.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><br></p>
+
+<h1 id="lets-pay-attention-now">Let’s Pay Attention Now</h1>
+<p>The <span class="context">context</span>  vector turned out to be a bottleneck for these types of models. It made it challenging for the models to deal with long sentences. A solution was proposed in <a href="https://arxiv.org/abs/1409.0473">Bahdanau et al., 2014</a> and <a href="https://arxiv.org/abs/1508.04025">Luong et al., 2015</a>. These papers introduced and refined a technique called “Attention”, which highly improved the quality of machine translation systems. Attention allows the model to focus on the relevant parts of the input sequence as needed.</p>
+
+<p><img src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/attention.png"></p>
+
+<div class="img-div">
+    At time step 7, the attention mechanism enables the <span class="decoder">decoder</span>  to focus on the word "étudiant" ("student" in french) before it generates the English translation. This ability to amplify the signal from the relevant part of the input sequence makes attention models produce better results than models without attention.
+</div>
+
+<p><br></p>
+
+<p>Let’s continue looking at attention models at this high level of abstraction. An attention model differs from a classic sequence-to-sequence model in two main ways:</p>
+
+<p>First, the <span class="encoder">encoder</span> passes a lot more data to the <span class="decoder">decoder</span>. Instead of passing the last hidden state of the encoding stage, the <span class="encoder">encoder</span> passes <em>all</em> the <span class="context">hidden states</span>  to the <span class="decoder">decoder</span>:</p>
+
+<video width="100%" height="auto" loop="" autoplay="" controls="">
+  <source src="/images/seq2seq_7.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><br></p>
+
+<p>Second, an attention <span class="decoder">decoder</span>  does an extra step before producing its output. In order to focus on the parts of the input that are relevant to this decoding time step, the <span class="decoder">decoder</span>  does the following:</p>
+
+<ol>
+  <li>Look at the set of encoder <span class="context">hidden states</span>  it received – each <span class="context">encoder hidden state</span>  is most associated with a certain word in the input sentence</li>
+  <li>Give each <span class="context">hidden state</span>  a score (let’s ignore how the scoring is done for now)</li>
+  <li>Multiply each <span class="context">hidden state</span>  by its softmaxed score, thus amplifying <span class="context">hidden states</span>  with high scores, and drowning out <span class="context">hidden states</span>  with low scores</li>
+</ol>
+
+<video width="100%" height="auto" loop="" autoplay="" controls="">
+   <source src="/images/attention_process.mp4" type="video/mp4">
+   Your browser does not support the video tag.
+</video>
+
+<p><br>
+<br></p>
+
+<p>This scoring exercise is done at each time step on the <span class="decoder">decoder</span> side.</p>
+
+<p>Let us now bring the whole thing together in the following visualization and look at how the attention process works:</p>
+
+<ol>
+  <li>The attention decoder RNN takes in the embedding of the <span class="embedding">&lt;END&gt;</span> token, and an <span class="decoder">initial decoder hidden state</span>.</li>
+  <li>The RNN processes its inputs, producing an output and a <span class="decoder">new hidden state</span> vector (<span class="decoder">h</span><span class="step_no">4</span>). The output is discarded.</li>
+  <li>Attention Step: We use the <span class="context">encoder hidden states</span> and the <span class="decoder">h</span><span class="step_no">4</span> vector to calculate a context vector (<span class="step_no">C</span><span class="decoder">4</span>) for this time step.</li>
+  <li>We concatenate <span class="decoder">h</span><span class="step_no">4</span> and <span class="step_no">C</span><span class="decoder">4</span> into one vector.</li>
+  <li>We pass this vector through a <span class="ffnn">feedforward neural network</span> (one trained jointly with the model).</li>
+  <li>The <span class="logits_output">output</span> of the feedforward neural networks indicates the output word of this time step.</li>
+  <li>Repeat for the next time steps</li>
+</ol>
+
+<video width="100%" height="auto" loop="" autoplay="" controls="">
+   <source src="/images/attention_tensor_dance.mp4" type="video/mp4">
+   Your browser does not support the video tag.
+</video>
+
+<p><br>
+<br></p>
+
+<p>This is another way to look at which part of the input sentence we’re paying attention to at each decoding step:</p>
+
+<video width="100%" height="auto" loop="" autoplay="" controls="">
+  <source src="/images/seq2seq_9.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p>Note that the model isn’t just mindless aligning the first word at the output with the first word from the input. It actually learned from the training phase how to align words in that language pair (French and English in our example). An example for how precise this mechanism can be comes from the attention papers listed above:</p>
+
+<div class="img-div">
+<img src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/attention_sentence.png">
+    You can see how the model paid attention correctly when outputing "European Economic Area". In French, the order of these words is reversed ("européenne économique zone") as compared to English. Every other word in the sentence is in similar order.
+</div>
+
+<p><br></p>
+
+<p>If you feel you’re ready to learn the implementation, be sure to check TensorFlow’s <a href="https://github.com/tensorflow/nmt">Neural Machine Translation (seq2seq) Tutorial</a>.</p>
+
+<hr>
+
+<p><br></p>
+
+<p>I hope you’ve found this useful. These visuals are early iterations of a lesson on attention that is part of the Udacity <a href="https://www.udacity.com/course/natural-language-processing-nanodegree--nd892">Natural Language Processing Nanodegree Program</a>. We go into more details in the lesson, including discussing applications and touching on more recent attention methods like the Transformer model from  <a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a>.</p>
+
+<p>Check out the trailer of the <a href="https://www.udacity.com/course/natural-language-processing-nanodegree--nd892">NLP Nanodegree Program</a>:</p>
+
+<div class="videoWrapper">
+<iframe width="560" height="349" src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/FggN0VtWYTk.html" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+</div>
+
+<p>I’ve also created a few lessons as a part of Udacity’s <a href="https://www.udacity.com/course/machine-learning-engineer-nanodegree--nd009t">Machine Learning Nanodegree Program</a>. The lessons I’ve created cover Unsupervised Learning, as well as a jupyter notebook on movie recommendations using collaborative filtering.</p>
+
+<p>I’d love any feedback you may have. Please reach me at <a href="https://twitter.com/JayAlammar">@JayAlammmar</a>.</p>
+
+  </div>
+
+  <div class="date">
+    Written on May  9, 2018
+  </div>
+
+  
+</article>
+
+    </div>
+
+
+
+    <!-- Begin Mailchimp Signup Form -->
+    <link href="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/classic-10_7.css" rel="stylesheet" type="text/css">
+    <style type="text/css">
+    	#mc_embed_signup{background:#fff; clear:left; font:14px Helvetica,Arial,sans-serif; }
+    	/* Add your own Mailchimp form style overrides in your site stylesheet or in this style block.
+    	   We recommend moving this block and the preceding CSS link to the HEAD of your HTML file. */
+    </style>
+    <div id="mc_embed_signup">
+    <form action="https://github.us19.list-manage.com/subscribe/post?u=2a4ade7dafcdbbf2eb4aae3cf&amp;id=f1f8c03f13" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="novalidate">
+        <div id="mc_embed_signup_scroll">
+    	<h2>Subscribe to get notified about upcoming posts by email</h2>
+    <div class="mc-field-group">
+    	<label for="mce-EMAIL">Email Address </label>
+    	<input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" aria-required="true">
+    </div>
+    	<div id="mce-responses" class="clear">
+    		<div class="response" id="mce-error-response" style="display:none"></div>
+    		<div class="response" id="mce-success-response" style="display:none"></div>
+    	</div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_2a4ade7dafcdbbf2eb4aae3cf_f1f8c03f13" tabindex="-1" value=""></div>
+        <div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button"></div>
+        </div>
+    </form>
+    </div>
+    <script type="text/javascript" src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/mc-validate.js"></script><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script>
+    <!--End mc_embed_signup-->
+
+<div style="padding: 10px 0 10px 3%; color: #555; font-size:85%">
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/88x31.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
+
+<br>
+Attribution example:
+<br>
+<i>Alammar, J (2018). The Illustrated Transformer [Blog post]. Retrieved from <a href="https://jalammar.github.io/illustrated-transformer/">https://jalammar.github.io/illustrated-transformer/</a></i>
+
+<br><br>
+Note: If you translate any of the posts, let me know so I can link your translation to the original post. My email is in the <a href="https://jalammar.github.io/about">about page</a>.
+</div>
+
+
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          
+
+
+
+<a href="https://github.com/jalammar"><i class="svg-icon github"></i></a>
+
+<a href="https://www.linkedin.com/in/jalammar"><i class="svg-icon linkedin"></i></a>
+
+
+<a href="https://www.twitter.com/jayalammar"><i class="svg-icon twitter"></i></a>
+
+
+
+        </footer>
+      </div>
+    </div>
+
+    
+	<!-- Google tag (gtag.js) -->
+	<script async="" src="./Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention) – Jay Alammar – Visualizing machine learning one concept at a time._files/js"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'G-R9S1R9LV9P');
+	</script>
+	<!-- End Google Analytics -->
+
+
+  
+
+</body><grammarly-desktop-integration data-grammarly-shadow-root="true"><template shadowrootmode="open"><style>
+      div.grammarly-desktop-integration {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select:none;
+        user-select:none;
+      }
+
+      div.grammarly-desktop-integration:before {
+        content: attr(data-content);
+      }
+    </style><div aria-label="grammarly-integration" role="group" tabindex="-1" class="grammarly-desktop-integration" data-content="{&quot;mode&quot;:&quot;full&quot;,&quot;isActive&quot;:true,&quot;isUserDisabled&quot;:false}"></div></template></grammarly-desktop-integration></html>

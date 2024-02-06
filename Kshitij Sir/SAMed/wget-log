@@ -1,0 +1,25 @@
+HTTP request sent, awaiting response... 206 Partial Content
+Length: 2192460565 (2.0G), 1208421516 (1.1G) remaining [text/plain]
+Saving to: ‘physionet.org/files/chexmask-cxr-segmentation-data/0.3/OriginalResolution/ChestX-Ray8.csv’
+
+
+
+2024-01-12 19:47:12 (1.27 MB/s) - ‘physionet.org/files/chexmask-cxr-segmentation-data/0.3/OriginalResolution/ChestX-Ray8.csv’ saved [2192460565/2192460565]
+
+--2024-01-12 19:47:12--  https://physionet.org/files/chexmask-cxr-segmentation-data/0.3/OriginalResolution/MIMIC-CXR-JPG.csv
+Reusing existing connection to physionet.org:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 12982555253 (12G) [text/plain]
+Saving to: ‘physionet.org/files/chexmask-cxr-segmentation-data/0.3/OriginalResolution/MIMIC-CXR-JPG.csv’
+
+
+
+2024-01-12 21:30:38 (255 KB/s) - Read error at byte 295222917/12982555253 (Connection timed out). Retrying.
+
+--2024-01-12 21:30:39--  (try: 2)  https://physionet.org/files/chexmask-cxr-segmentation-data/0.3/OriginalResolution/MIMIC-CXR-JPG.csv
+Connecting to physionet.org (physionet.org)|18.18.42.54|:443... connected.
+HTTP request sent, awaiting response... 206 Partial Content
+Length: 12982555253 (12G), 12687332336 (12G) remaining [text/plain]
+Saving to: ‘physionet.org/files/chexmask-cxr-segmentation-data/0.3/OriginalResolution/MIMIC-CXR-JPG.csv’
+
+                                        physionet.  36%[++=====================================>                                                                        ]   4.35G  1.11MB/s    eta 1h 49m                                        physionet.o  36%[++=====================================>                                                                        ]   4.35G  1.12MB/s    eta 1h 49m                                       physionet.or  36%[++=====================================>                                                                        ]   4.35G  1.14MB/s    eta 1h 49m                                      physionet.org  36%[++=====================================>                                                                        ]   4.35G  1.15MB/s    eta 1h 49m 
